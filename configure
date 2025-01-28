@@ -1,0 +1,48 @@
+set -x
+set -e
+
+# Set number of parallel jobs for cmake build
+export CMAKE_BUILD_PARALLEL_LEVEL=$(nproc)
+
+
+which cmake
+which swig
+
+# building dependencies
+#rm -rf _build_dependencies
+cmake -S./libsbml-dependencies -B_build_dependencies \
+    -DCMAKE_VERBOSE_MAKEFILE=ON \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DWITH_EXPAT=ON \
+    -DWITH_BZIP2=ON \
+    -DWITH_ZLIB=ON \
+    -DWITH_CHECK=OFF \
+    -DWITH_LIBXML=OFF \
+    -DWITH_XERCES=OFF \
+    -DCMAKE_INSTALL_PREFIX=_install_dependencies
+
+cmake --build _build_dependencies --target install --config Release
+
+# rm -rf _builds
+
+cmake -S./libsbml -B_builds \
+    -DCMAKE_VERBOSE_MAKEFILE=ON \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=_install \
+    -DLIBSBML_DEPENDENCIES_DIR=_install_dependencies \
+    -DWITH_R=ON \
+    -DLIBSBML_SKIP_SHARED_LIBRARY=ON \
+    -DLIBSBML_SKIP_STATIC_LIBRARY=OFF \
+    -DWITH_STABLE_PACKAGES=ON
+
+cmake --build _builds --target binding_r_lib --config Release
+
+mkdir -p inst/libs
+mkdir -p libs
+mkdir -p R
+
+# src
+cp ./_builds/src/bindings/r/libSBML.R R/ || echo "Failed: libSBML.R -> R"
+
+cp ./_builds/src/bindings/r/libSBML.so libs/ || echo "Failed: libSBML.so -> libs"
+cp ./_builds/src/bindings/r/libSBML.so inst/libs/ || echo "Failed: libSBML.so -> inst/libs"

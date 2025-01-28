@@ -1,0 +1,6 @@
+[submodule "libsbml"]
+	path = libsbml
+	url = https://github.com/sbmlteam/libsbml
+[submodule "libsbml-dependencies"]
+	path = libsbml-dependencies
+	url = https://github.com/sbmlteam/libSBML-dependencies
