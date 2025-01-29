@@ -1,0 +1,52 @@
+# Set number of parallel jobs for cmake build
+SET CMAKE_BUILD_PARALLEL_LEVEL=$(nproc)
+
+
+where cmake
+where swig
+
+# building dependencies
+#rm -rf _build_dependencies
+cmake -S./libsbml-dependencies -B_build_dependencies \
+    -DCMAKE_VERBOSE_MAKEFILE=ON \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DWITH_EXPAT=ON \
+    -DWITH_BZIP2=ON \
+    -DWITH_ZLIB=ON \
+    -DWITH_CHECK=OFF \
+    -DWITH_LIBXML=OFF \
+    -DWITH_XERCES=OFF \
+    -DCMAKE_INSTALL_PREFIX=_install_dependencies
+
+cmake --build _build_dependencies --target install --config Release
+
+# rm -rf _builds
+# set
+
+cmake -S./libsbml -B_builds \
+    -DCMAKE_VERBOSE_MAKEFILE=ON \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=_install \
+    -DLIBSBML_DEPENDENCIES_DIR=_install_dependencies \
+    -DWITH_R=ON \
+    -DWITH_LIBXML=OFF \
+    -DWITH_EXPAT=ON \
+    -DLIBSBML_SKIP_SHARED_LIBRARY=ON \
+    -DLIBSBML_SKIP_STATIC_LIBRARY=OFF \
+    -DR_LIB=$PWD/dev/r_lib_64/Rlib.lib \
+    -DR_INCLUDE_DIRS=$R_INCLUDE_DIR \
+    -DWITH_STABLE_PACKAGES=ON
+
+
+
+cmake --build _builds --target binding_r_lib --config Release
+
+mkdir -p inst/libs/x64/
+mkdir -p libs
+mkdir -p R
+
+# src
+cp ./_builds/src/bindings/r/libSBML.R R/ || echo "Failed: libSBML.R -> R"
+
+cp ./_builds/src/bindings/r/liblibSBML.dll libs/libSBML.dll || echo "Failed: libSBML.dll -> libs"
+cp ./_builds/src/bindings/r/liblibSBML.dll inst/libs/x64/libSBML.dll || echo "Failed: libSBML.dll -> inst/libs/x64/"

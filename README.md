@@ -38,3 +38,31 @@ to test whether installation worked, run one of the examples (from libsbml/examp
 ```bash
 R --slave -f ./libsbml/examples/r/printSupported.R 
 ```
+
+## Installation on Windows
+
+### Prerequisites
+You want to install R, swig and Rtools, either using [winget](https://github.com/microsoft/winget-cli): 
+
+```bash
+winget install RProject.R swig rtools
+```
+
+or alternatively using [choco](https://chocolatey.org/) from an elevated prompt
+
+```bash
+choco install -y rtools R.Project swig
+```
+
+
+then in a Terminal you'll be able to install just as above with: 
+
+```bash
+R CMD INSTALL . 
+```
+
+and test using
+
+```bash
+R --slave -f ./libsbml/examples/r/printSupported.R 
+```
