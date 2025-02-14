@@ -4,9 +4,20 @@ set -e
 # Set number of parallel jobs for cmake build
 export CMAKE_BUILD_PARALLEL_LEVEL=$(nproc)
 
+# in case there is a virtual environment set add it to 
+# the path (recommended to pickup swig)
+export PATH=$PATH:$VIRTUAL_ENV/bin
 
+# list environment variables
+set 
+
+# ensure we have cmake
 which cmake
+cmake --version
+
+# and swig
 which swig
+swig --version
 
 # building dependencies
 #rm -rf _build_dependencies
@@ -19,7 +30,7 @@ cmake -S./libsbml-dependencies -B_build_dependencies \
     -DWITH_CHECK=OFF \
     -DWITH_LIBXML=OFF \
     -DWITH_XERCES=OFF \
-    -DCMAKE_INSTALL_PREFIX=_install_dependencies
+    -DCMAKE_INSTALL_PREFIX=$PWD/_install_dependencies
 
 cmake --build _build_dependencies --target install --config Release
 
@@ -29,10 +40,14 @@ cmake -S./libsbml -B_builds \
     -DCMAKE_VERBOSE_MAKEFILE=ON \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX=_install \
-    -DLIBSBML_DEPENDENCIES_DIR=_install_dependencies \
+    -DLIBSBML_DEPENDENCY_DIR=$PWD/_install_dependencies \
     -DWITH_R=ON \
     -DLIBSBML_SKIP_SHARED_LIBRARY=ON \
     -DLIBSBML_SKIP_STATIC_LIBRARY=OFF \
+    -DR_INCLUDE_DIRS=$R_INCLUDE_DIR \
+    -DR_LIB=m \
+    -DWITH_EXPAT=ON \
+    -DWITH_LIBXML=OFF \
     -DWITH_STABLE_PACKAGES=ON
 
 cmake --build _builds --target binding_r_lib --config Release
